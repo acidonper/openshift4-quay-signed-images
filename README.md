@@ -50,8 +50,8 @@ oc new-project quay
 - Create S3 object management service account secret in Openshift
 
 ```$bash
-export AWS_ACCESS_KEY_ID='xxx'
-export AWS_SECRET_ACCESS_KEY='xxx'
+export AWS_ACCESS_KEY_ID='xxxx'
+export AWS_SECRET_ACCESS_KEY='xxxx'
 export AWS_S3_API=s3.us-east-2.amazonaws.com
 export AWS_S3_BUCKET=quay
 
@@ -62,6 +62,19 @@ sh 00-generate-quay-config.sh
 
 ```$bash
 sh 01-deploy-quay.sh
+
+oc get pods
+NAME                                         READY   STATUS             RESTARTS        AGE
+...
+registry-quay-app-6f7d94c744-sxvh6           1/1     Running            0               24m
+registry-quay-app-6f7d94c744-xchcm           1/1     Running            0               24m
+registry-quay-app-upgrade--1-gx958           0/1     Completed          0               24m
+registry-quay-config-editor-df5bc754-562pr   1/1     Running            0               24m
+registry-quay-database-6fffbdcc7-qxmts       1/1     Running            0               25m
+registry-quay-mirror-7f68fd5f9d-98w5s        1/1     Running            0               23m
+registry-quay-mirror-7f68fd5f9d-9mdp4        1/1     Running            0               23m
+registry-quay-postgres-init--1-qxr9c         0/1     Completed          0               24m
+registry-quay-redis-6d7df7cfb-5pb25          1/1     Running            0               25m
 ```
 
 - Initializate a new admin user and Access Red Hat Quay interface with credentials (quayadmin/xxx)
@@ -72,7 +85,6 @@ curl -X POST -k  https://${QUAY_URL}/api/v1/user/initialize --header 'Content-Ty
 ```
 
 NOTE: The information required to create a valid pull secret in Openshift is saved in an specific file **quay.creds**
-
 
 ### Create a signed image in Red Hat Quay
 
@@ -119,13 +131,13 @@ openssl s_client -connect ${QUAY_URL}:443 -showcerts
 ??
 
 ## MacOS
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ca.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ca.cert
 ```
 
 In addition, It is required to create the CA cert in Openshift as well:
 
 ```$bash
-oc create configmap registry-cas -n openshift-config --from-file=registry-quay-quay.apps.quaytest.sandbox1832.opentlc.com=ca.cert
+oc create configmap registry-cas -n openshift-config --from-file=registry-quay-quay.apps.meshtest.sandbox1266.opentlc.com=ca.cert
 oc patch image.config.openshift.io/cluster --patch '{"spec":{"additionalTrustedCA":{"name":"registry-cas"}}}' --type=merge
 ```
 
@@ -163,6 +175,8 @@ sh 04-test-signature-ok.sh
 ....
 ok-test-5ff58c6745-c2q4r                      1/1     Running            0               63s
 ```
+
+NOTE: It is required to make the repository public in Red Hat Quay
 
 ### Fail Test
 
