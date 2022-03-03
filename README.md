@@ -169,7 +169,7 @@ The following procedure tries to deploy an application in Openshift using the pr
 Please follow the next procedure that generates the included output:
 
 ```$bash
-QUAY_URL=$(oc get route registry-quay -o jsonpath='{.status.ingress[0].host}')
+export QUAY_URL=$(oc get route registry-quay -o jsonpath='{.status.ingress[0].host}')
 export DEST_IMAGE=${QUAY_URL}/quayadmin/jump-app-front-javascript:secure
 sh 04-test-signature-ok.sh
 ....
@@ -177,6 +177,12 @@ ok-test-5ff58c6745-c2q4r                      1/1     Running            0      
 ```
 
 NOTE: It is required to make the repository public in Red Hat Quay
+
+#### Cleaning Up Ok Test
+
+```$bash
+oc delete all -l app=ok-test
+```
 
 ### Fail Test
 
@@ -191,6 +197,12 @@ QUAY_URL=$(oc get route registry-quay -o jsonpath='{.status.ingress[0].host}')
 sh 05-test-signature-fail.sh
 ...
 10s          Warning   Failed              pod/fail-test-65c6c476c-dp9vn                Failed to pull image "registry-quay-quay.apps.quaytest.sandbox1832.opentlc.com/quayadmin/httpd-24@sha256:49c64d193ea5ee240fe700642ce509c203126c19d526a8d048cd837554ac7b1c": rpc error: code = Unknown desc = Source image rejected: A signature was required, but no signature exists
+```
+
+#### Cleaning Up Fail Test
+
+```$bash
+oc delete all -l app=fail-test
 ```
 
 ## Author
